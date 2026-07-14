@@ -35,6 +35,9 @@
 body {
     background: var(--bg);
     color: var(--text);
+}
+
+html,body {
     overflow-x: hidden;
 }
 
@@ -104,7 +107,7 @@ input:focus {
 
 #player-container {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 24px;
     padding: 24px;
 }
@@ -146,7 +149,7 @@ input:focus {
 }
 
 #filter-panel {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     transform: translateX(1000px);
@@ -531,14 +534,40 @@ input:focus {
 
 @media (max-width: 700px) {
     #player-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 10px;
     }
 
-    .mobile-nav {
-        display: block;
+    #filter-panel {
+        width: 85%;
     }
 
     header {
-        display: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    header input {
+        width: 100%;
+        order: 3;
+    }
+
+    .mobile-menu-btn {
+        display: block;
+        order: 1;
+    }
+
+    header > div:last-child {
+        order: 2;
+    }
+
+    .player-card {
+        padding: 16px 16px 72px 16px;
+    }
+
+    .player-card h1 {
+        font-size: 24px;
     }
 }
