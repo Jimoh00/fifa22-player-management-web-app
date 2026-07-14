@@ -1,0 +1,412 @@
+const API = "https://fifa22-player-management-web-app.onrender.com"
+
+async function loadPlayers() {
+    const res = await fetch(`${API}/players`)
+    const players = await res.json()
+
+    renderPlayer(players)
+}
+
+loadPlayers()
+
+document.getElementById("all-players-btn").addEventListener("click", async () => {
+    loadPlayers()
+})
+
+async function renderPlayer(players){
+    playerContainer = document.getElementById('player-container');
+    playerContainer.innerHTML = ""
+
+    players.forEach(player => {
+        const player_card = document.createElement('div')
+        player_card.classList.add("player-card")
+        player_card.innerHTML = `
+            <div>
+                <p class="position">${player.player_positions}</p>
+                <h1>${player.short_name}</h1>
+                <div class="card-footer">
+                    <p class="club">${player.club_name}</p> 
+                    <p class="overall">${player.overall}</p>
+                </div>    
+            </div>
+        `
+
+        player_card.addEventListener("click", async() => {
+            const res = await fetch(`${API}/players/${player.id}`)
+            const playerDetails = await res.json()
+            openPlayerModal(playerDetails)
+
+        })
+
+
+        playerContainer.appendChild(player_card);
+    })
+}
+
+function openPlayerModal(player) {
+    document.getElementById("modal-overlay").style.display = "flex";
+    document.getElementById("modalPlayerPosition").textContent = player.player_positions
+    document.getElementById("modalPlayerName").textContent = player.short_name
+    document.getElementById("modalPlayerClub").textContent = player.club_name
+    document.getElementById("modalPlayerNationality").textContent = player.nationality_name
+    document.getElementById("modalOverall").textContent = player.overall
+    document.getElementById("modalPotential").textContent = player.potential
+    document.getElementById("modalAge").textContent = player.age
+    document.getElementById("modalHeight").textContent = player.height_cm
+    document.getElementById("modalWeight").textContent = player.weight_kg
+    document.getElementById("modalFoot").textContent = player.preferred_foot
+    document.getElementById("modalValue").textContent = format_value(player.value_eur)
+    document.getElementById("modalWage").textContent = format_value(player.wage_eur)
+    document.getElementById("modalPace").textContent = player.pace
+    document.getElementById("modalSho").textContent = player.shooting
+    document.getElementById("modalPas").textContent = player.passing
+    document.getElementById("modalDri").textContent = player.dribbling
+    document.getElementById("modalDef").textContent = player.defending
+    document.getElementById("modalPhy").textContent = player.physic
+    
+    document.getElementById("paceProgress").style.width = `${player.pace}%`
+    document.getElementById("shoProgress").style.width = `${player.shooting}%`
+    document.getElementById("pasProgress").style.width = `${player.passing}%`
+    document.getElementById("driProgress").style.width = `${player.dribbling}%`
+    document.getElementById("defProgress").style.width = `${player.defending}%`
+    document.getElementById("phyProgress").style.width = `${player.physic}%`
+
+    document.querySelectorAll(".progress").forEach(p => {
+        const value = parseInt(p.style.width)   // "98%" → 98
+        if (value < 50) {
+            p.style.background = "#e0483d"
+        } else if (value < 80) {
+            p.style.background = "#e0a83e"
+        } else {
+            p.style.background = "#3ddc97"
+        }
+    })
+}
+
+document.getElementById("closePM-btn").addEventListener("click", () => {
+    document.getElementById("modal-overlay").style.display = "none";
+})
+
+document.getElementById("top-player-btn").addEventListener("click", async () => {
+    const res = await fetch(`${API}/players/top`)
+    const players = await res.json()
+    renderPlayer(players)
+});
+
+document.getElementById("hdn-gems").addEventListener('click', async () => {
+    const res = await fetch(`${API}/players/hidden-gems`)
+    const players = await res.json()
+    renderPlayer(players)
+});
+
+document.getElementById("compare-link").addEventListener('click', async () => {
+    playerContainer = document.getElementById('player-container');
+    playerContainer.innerHTML = ""
+
+    const compareContainer = document.createElement('div')
+    compareContainer.classList.add("compare-container")
+    compareContainer.innerHTML = `
+        <div>
+            <div class="input-block">
+                <input list="player1" id="player1-input" placeholder="player 1">
+                <datalist id="player1"></datalist>
+                <input list="player2" id="player2-input" placeholder="player 2">
+                <datalist id="player2"></datalist>
+                <button id="compare-btn" class="cta">Compare</button>
+            </div>
+
+
+            <div class="comparison-stats">
+                <div class="stats">
+                    <div class="player-1-card comparison-card">
+                        <h1 id="player1-overall">00</h1>
+                        <h4 id="player1-name">player name</h4>
+                        <div>
+                            <p id="player1-club">player club</p>
+                            <p id="player1-country">country</p>
+                        </div>
+                    </div>
+                    <div><p>VS</p></div>
+                    <div class="player-2-card comparison-card">
+                        <h1 id="player2-overall">00</h1>
+                        <h4 id="player2-name">player name</h4>
+                        <div>
+                            <p id="player2-club">player club</p>
+                            <p id="player2-country">country</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compared-attrib">
+                    <p>main stats</p>
+
+                    <div>
+                        <h1 class="left-stat stat" id="player1-pace">91</h1>
+                        <p>pace</p>
+                        <h1 class="right-stat stat" id="player2-pace">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-sht">91</h1>
+                        <p>shooting</p>
+                        <h1 class="right-stat stat" id="player2-sht">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-pass">91</h1>
+                        <p>passing</p>
+                        <h1 class="right-stat stat" id="player2-pass">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-drb">91</h1>
+                        <p>dribbling</p>
+                        <h1 class="right-stat stat" id="player2-drb">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-def">91</h1>
+                        <p>defending</p>
+                        <h1 class="right-stat stat" id="player2-def">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-phy">91</h1>
+                        <p>physical</p>
+                        <h1 class="right-stat stat" id="player2-phy">90</h1>
+                    </div>
+                </div>
+
+
+                <div class="compared-attrib">
+                    <p>profile</p>
+
+                    <div>
+                        <h1 class="left-stat stat" id="player1-age">91</h1>
+                        <p>age</p>
+                        <h1 class="right-stat stat" id="player2-age">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-value">91</h1>
+                        <p>value</p>
+                        <h1 class="right-stat stat" id="player2-value">90</h1>
+                    </div>
+                    <div>
+                        <h1 class="left-stat stat" id="player1-pot">91</h1>
+                        <p>potential</p>
+                        <h1 class="right-stat stat" id="player2-pot">90</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    playerContainer.appendChild(compareContainer)
+
+    
+    document.getElementById('compare-btn').addEventListener('click', async () => {
+        const p1 = document.getElementById('player1-input').value 
+        const p2 = document.getElementById('player2-input').value 
+        comparePlayers(p1, p2)
+        document.querySelector('.comparison-stats').classList.add("active")
+    })
+
+    async function load_player1_names(){
+        const res = await fetch(`${API}/player_name`)
+        const player_names = await res.json()
+        const datalist = document.getElementById("player1")
+        player_names.forEach(p => {
+            const option = document.createElement('option')
+            option.value = p
+            datalist.appendChild(option)
+        })
+    }
+
+    async function load_player2_names(){
+        const res = await fetch(`${API}/player_name`)
+        const player_names = await res.json()
+        const datalist = document.getElementById("player2")
+        player_names.forEach(p => {
+            const option = document.createElement('option')
+            option.value = p
+            datalist.appendChild(option)
+        })
+    }
+
+    load_player1_names()
+    load_player2_names()
+})
+
+function format_value(value) {
+    if (!value) return "N/A"
+    if (value >= 1000000) return `€${(value / 1000000).toFixed(1)}M`
+    if (value >= 1000) return `€${(value / 1000).toFixed(1)}K`
+    retrun `€${value}`
+}
+
+async function comparePlayers(p1, p2){
+    const res = await fetch(`${API}/players/compare?p1=${p1}&p2=${p2}`)
+    const data = await res.json()
+    
+    const player1 = data.player1
+    const player2 = data.player2 
+
+    document.getElementById("player1-overall").textContent = player1.overall
+    document.getElementById("player1-name").textContent = player1.short_name
+    document.getElementById("player1-club").textContent = player1.club_name 
+    document.getElementById("player1-country").textContent = player1.nationality_name
+    document.getElementById("player1-pace").textContent = player1.pace
+    document.getElementById("player1-sht").textContent = player1.shooting
+    document.getElementById("player1-pass").textContent = player1.passing
+    document.getElementById("player1-drb").textContent = player1.dribbling
+    document.getElementById("player1-def").textContent = player1.defending
+    document.getElementById("player1-phy").textContent = player1.physic
+    document.getElementById("player1-age").textContent = player1.age
+    document.getElementById("player1-value").textContent = format_value(player1.value_eur)
+    document.getElementById("player1-pot").textContent = player1.potential
+
+    document.getElementById("player2-overall").textContent = player2.overall
+    document.getElementById("player2-name").textContent = player2.short_name
+    document.getElementById("player2-club").textContent = player2.club_name 
+    document.getElementById("player2-country").textContent = player2.nationality_name
+    document.getElementById("player2-pace").textContent = player2.pace
+    document.getElementById("player2-sht").textContent = player2.shooting
+    document.getElementById("player2-pass").textContent = player2.passing
+    document.getElementById("player2-drb").textContent = player2.dribbling
+    document.getElementById("player2-def").textContent = player2.defending
+    document.getElementById("player2-phy").textContent = player2.physic
+    document.getElementById("player2-age").textContent = player2.age
+    document.getElementById("player2-value").textContent = format_value(player2.value_eur)
+    document.getElementById("player2-pot").textContent = player2.potential
+
+    if (player1.pace > player2.pace) {
+        document.getElementById("player1-pace").style.color = "#00e5a0";
+    } else if (player2.pace > player1.pace) {
+        document.getElementById("player2-pace").style.color = "#00e5a0";
+    }
+
+    if (player1.shooting > player2.shooting) {
+        document.getElementById("player1-sht").style.color = "#00e5a0";
+    } else if (player2.shooting > player1.shooting) {
+        document.getElementById("player2-sht").style.color = "#00e5a0";
+    }
+
+    if (player1.passing > player2.passing) {
+        document.getElementById("player1-pass").style.color = "#00e5a0";
+    } else if (player2.passing > player1.passing) {
+        document.getElementById("player2-pass").style.color = "#00e5a0";
+    }
+
+    if (player1.dribbling > player2.dribbling) {
+        document.getElementById("player1-drb").style.color = "#00e5a0";
+    } else if (player2.dribbling > player1.dribbling) {
+        document.getElementById("player2-drb").style.color = "#00e5a0";
+    }
+
+    if (player1.defending > player2.defending) {
+        document.getElementById("player1-def").style.color = "#00e5a0";
+    } else if (player2.defending > player1.defending) {
+        document.getElementById("player2-def").style.color = "#00e5a0";
+    }
+
+    if (player1.physic > player2.physic) {
+        document.getElementById("player1-phy").style.color = "#00e5a0";
+    } else if (player2.physic > player1.physic) {
+        document.getElementById("player2-phy").style.color = "#00e5a0";
+    }
+}
+
+
+async function load_nationalities(){
+    const res = await fetch(`${API}/nationalities`)
+    const countries = await res.json()
+    const datalist = document.getElementById("countries")
+    countries.forEach(c => {
+        const option = document.createElement('option')
+        option.value = c 
+        datalist.appendChild(option)
+    })
+}
+
+async function load_clubs(){
+    const res = await fetch(`${API}/clubs`)
+    const clubs = await res.json()
+    const datalist = document.getElementById("clubs")
+    clubs.forEach(c => {
+        const option = document.createElement('option')
+        option.value = c
+        datalist.appendChild(option)
+    })
+}
+
+load_nationalities()
+load_clubs()
+
+async function filterPlayers(){
+    const name = document.getElementById('search-input').value 
+    const club = document.getElementById('club-filter').value 
+    const nationality = document.getElementById('nationality-filter').value 
+    const activePositionBtn = document.querySelector(".position-btn.active")
+    const position = activePositionBtn ? activePositionBtn.textContent : ""
+    
+    let url = `${API}/players?`
+
+    if (name) url += `short_name=${name}&`
+    if (club) url += `club_name=${club}&`
+    if (nationality) url += `nationality_name=${nationality}&`
+    if (position) url += `player_positions=${position}&`
+
+    const res = await fetch(url)
+    const players = await res.json()
+    renderPlayer(players)
+    
+    
+}
+
+document.getElementById('search-input').addEventListener("input", filterPlayers)
+document.getElementById('club-filter').addEventListener("change", filterPlayers)
+document.getElementById('nationality-filter').addEventListener("change", filterPlayers)
+
+
+document.getElementById('filter-btn').addEventListener('click', () => {
+    document.getElementById('filter-panel').style.transform = 'translateX(0)'
+})
+
+document.getElementById('close-btn').addEventListener('click', () => {
+    document.getElementById('filter-panel').style.transform = "translateX(1000px)"
+})
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+    document.getElementById('club-filter').value = ""
+    document.getElementById("nationality-filter").value = ""
+    document.querySelectorAll(".position-btn").forEach(pB => {
+        pB.classList.remove("active")
+    });
+
+    loadPlayers()
+})
+
+const navLinks = document.querySelectorAll(".nav-link")
+
+navLinks.forEach(link => {
+    link.addEventListener("click", () => {
+        navLinks.forEach(l => l.classList.remove("active"))
+
+        link.classList.add("active")
+    })
+});
+
+async function load_positions(){
+    const res = await fetch(`${API}/positions`)
+    const positions = await res.json()
+
+    positions.forEach(position => {
+        const positionBtn = document.createElement("div")
+        positionBtn.classList.add('position-btn')
+        positionBtn.textContent = position
+
+        positionBtn.addEventListener('click', () => {
+            document.querySelectorAll('positionBtn').forEach(pB => pB.classList.remove("active"))
+            positionBtn.classList.add('active')
+            filterPlayers()
+        })
+
+        document.getElementById('positions-filter').appendChild(positionBtn)
+    })
+}
+
+load_positions()
